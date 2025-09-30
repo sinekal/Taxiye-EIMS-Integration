@@ -1,0 +1,184 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-29 00:39:57.130331",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "date",
+  "taxi_provider_name",
+  "tax_provider_address",
+  "taxi_provider_tin",
+  "taxi_provider_phone",
+  "taxi_provider_email",
+  "rider__phone",
+  "rider_name",
+  "trip_id",
+  "payment_status",
+  "payment_mode",
+  "irn",
+  "signed_qr",
+  "column_break_qoxq",
+  "base_fare",
+  "commission_rate",
+  "commission_amount",
+  "vat_amount",
+  "status",
+  "acknowledged_date",
+  "document_number",
+  "invoice_counter",
+  "signed_invoice",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "trip_id",
+   "fieldtype": "Data",
+   "label": "Invoice Number"
+  },
+  {
+   "fieldname": "rider_name",
+   "fieldtype": "Data",
+   "label": "Rider Name"
+  },
+  {
+   "fieldname": "payment_status",
+   "fieldtype": "Select",
+   "label": "Payment Status",
+   "options": "Unpaid\nPaid"
+  },
+  {
+   "fieldname": "payment_mode",
+   "fieldtype": "Select",
+   "label": "Payment Mode",
+   "options": "Cash\nBank"
+  },
+  {
+   "fieldname": "irn",
+   "fieldtype": "Data",
+   "label": "IRN"
+  },
+  {
+   "fieldname": "signed_qr",
+   "fieldtype": "Data",
+   "label": "Signed QR"
+  },
+  {
+   "fieldname": "column_break_qoxq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "base_fare",
+   "fieldtype": "Currency",
+   "label": "Base Fare"
+  },
+  {
+   "fieldname": "commission_rate",
+   "fieldtype": "Percent",
+   "label": "Commission Rate"
+  },
+  {
+   "fieldname": "commission_amount",
+   "fieldtype": "Currency",
+   "label": "Commission Amount"
+  },
+  {
+   "fieldname": "vat_amount",
+   "fieldtype": "Currency",
+   "label": "VAT Amount"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Pending\nSent to EIMS\nCompleted"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Datetime",
+   "label": "Date"
+  },
+  {
+   "fieldname": "taxi_provider_name",
+   "fieldtype": "Data",
+   "label": "Taxi Provider Name"
+  },
+  {
+   "fieldname": "taxi_provider_email",
+   "fieldtype": "Data",
+   "label": "Taxi provider Email"
+  },
+  {
+   "fieldname": "taxi_provider_tin",
+   "fieldtype": "Data",
+   "label": "Taxi Provider Tin "
+  },
+  {
+   "fieldname": "taxi_provider_phone",
+   "fieldtype": "Phone",
+   "label": "Taxi provider phone"
+  },
+  {
+   "fieldname": "acknowledged_date",
+   "fieldtype": "Datetime",
+   "label": "Acknowledged Date"
+  },
+  {
+   "fieldname": "document_number",
+   "fieldtype": "Data",
+   "label": "Document Number"
+  },
+  {
+   "fieldname": "invoice_counter",
+   "fieldtype": "Data",
+   "label": "Invoice Counter"
+  },
+  {
+   "fieldname": "signed_invoice",
+   "fieldtype": "Code",
+   "label": "Signed Invoice"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "rider__phone",
+   "fieldtype": "Phone",
+   "label": "Rider  Phone"
+  },
+  {
+   "fieldname": "tax_provider_address",
+   "fieldtype": "Data",
+   "label": "Tax Provider Address"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-09-30 04:27:23.182637",
+ "modified_by": "Administrator",
+ "module": "Taxiye Eims Integration",
+ "name": "Trip Invoice",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

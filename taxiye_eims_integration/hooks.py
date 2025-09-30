@@ -5,6 +5,21 @@ app_description = "taxiye_eims_integration"
 app_email = "sintayehu@mevinai.com"
 app_license = "mit"
 
+
+
+
+# doc_events = {
+#     "Trip Invoice": {
+#         "on_submit": "taxiye_eims_integration.taxiye_eims_integration.doctype.trip_invoice.trip_invoice.on_submit"
+#     },
+#     "Trip Receipt": {
+#         "on_submit": "taxiye_eims_integration.taxiye_eims_integration.doctype.trip_receipt.trip_receipt.on_submit"
+#     }
+# }
+
+
+
+
 # Apps
 # ------------------
 
