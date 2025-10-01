@@ -8,6 +8,4 @@ from frappe.model.document import Document
 class EIMSSettings(Document):
 	pass
 
-@frappe.whitelist()
-def get_settings():
-    return frappe.get_doc("EIMS Settings")
+
