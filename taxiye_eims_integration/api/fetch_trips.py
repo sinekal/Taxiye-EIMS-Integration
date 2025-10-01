@@ -43,11 +43,11 @@ def get_item_details(payload):
     item = {
             "ItemCode": payload.reference,
             "ProductDescription": payload.description,
-            "Quantity": 1,
-            "LineNumber": 1,
+            "Quantity": payload.quantity,
+            "LineNumber": payload.line_number or 1,
             "VatAmount": vat_amount,
             "TotalLineAmount": total_amount,
-            "Unit": "km",
+            "Unit": "PCs",
             "UnitPrice": commission_rate,
             "NatureOfSupplies": "services",
         }

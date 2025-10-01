@@ -5,7 +5,8 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "invoice_date",
+  "date",
+  "time",
   "taxi_provider_name",
   "tax_provider_address",
   "taxi_provider_tin",
@@ -170,12 +171,6 @@
    "label": "Previous Irn"
   },
   {
-   "fieldname": "invoice_date",
-   "fieldtype": "Datetime",
-   "label": "Invoice Date",
-   "reqd": 1
-  },
-  {
    "fieldname": "total_amount",
    "fieldtype": "Currency",
    "label": "Total Amount",
@@ -185,12 +180,23 @@
    "fieldname": "rider_tin",
    "fieldtype": "Data",
    "label": "Rider TIN"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "time",
+   "fieldtype": "Time",
+   "label": "Time"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-30 14:07:10.451974",
+ "modified": "2025-10-01 10:14:17.649588",
  "modified_by": "Administrator",
  "module": "Taxiye Eims Integration",
  "name": "Trip Invoice",
