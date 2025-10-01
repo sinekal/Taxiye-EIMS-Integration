@@ -15,11 +15,12 @@ def save_eims_invoice(
     document_number: int,
     invoice_counter: int,
     irn: str,
+    invoice_number: str,
     previous_irn: str | None,
     base_fare: float,
     commission_amount: float,
     vat_amount: float,
-    total_payment: float,
+    total_amount: float,
     status: str,
     signed_qr: str,
     acknowledged_date,
@@ -57,7 +58,7 @@ def save_eims_invoice(
     transaction_doc.vat_amount = vat_amount
     transaction_doc.commission_amount = commission_amount
     transaction_doc.base_fare = base_fare
-    transaction_doc.total_payment = total_payment
+    transaction_doc.total_amount = total_amount
     transaction_doc.status = status
     transaction_doc.signed_qr = signed_qr
     transaction_doc.signed_invoice = signed_invoice
@@ -69,3 +70,34 @@ def save_eims_invoice(
 
     return transaction_doc
 
+#create temporary invoice 
+def temporary_eims_invoice(document_number, invoice_counter):
+    # Create a new Document instance of doctype 'USP Invoice'
+    transaction_doc = frappe.new_doc("Trip Invoice")  # type: ignore
+
+    # --- Required fields from schema ---
+    transaction_doc.invoice_number = f"TEMP-{invoice_counter}"
+    transaction_doc.taxi_provider_name = "TEMP PROVIDER"
+    transaction_doc.taxi_provider_tin = "000000000"
+    transaction_doc.date = now_datetime().date()
+    transaction_doc.reference = f"REF-{invoice_counter}"
+    transaction_doc.amount = 0
+    transaction_doc.total_amount = 0
+    transaction_doc.status = "Pending"  # must be one of: pending, sent to EIMS, acknowledged, completed, failed
+
+    # --- Optional / placeholder fields ---
+    transaction_doc.tax = 0
+    transaction_doc.previous_irn = ""
+    transaction_doc.irn = ""
+    transaction_doc.signed_qr = ""
+    transaction_doc.signed_invoice = ""
+    transaction_doc.acknowledged_date = now_datetime()
+    transaction_doc.document_number = document_number
+    transaction_doc.invoice_counter = invoice_counter
+    transaction_doc.description = "Temporary invoice created for synchronization."
+
+    # Save
+    transaction_doc.insert(ignore_permissions=True)
+    frappe.db.commit()  # type: ignore
+
+    return transaction_doc

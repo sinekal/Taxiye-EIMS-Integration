@@ -5,24 +5,28 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "date",
+  "invoice_date",
   "taxi_provider_name",
   "tax_provider_address",
   "taxi_provider_tin",
   "taxi_provider_phone",
   "taxi_provider_email",
-  "rider__phone",
   "rider_name",
+  "rider_phone",
+  "rider_tin",
   "trip_id",
   "payment_status",
-  "payment_mode",
+  "payment_method",
   "irn",
   "signed_qr",
+  "reference",
+  "previous_irn",
   "column_break_qoxq",
   "base_fare",
   "commission_rate",
   "commission_amount",
   "vat_amount",
+  "total_amount",
   "status",
   "acknowledged_date",
   "document_number",
@@ -46,12 +50,6 @@
    "fieldtype": "Select",
    "label": "Payment Status",
    "options": "Unpaid\nPaid"
-  },
-  {
-   "fieldname": "payment_mode",
-   "fieldtype": "Select",
-   "label": "Payment Mode",
-   "options": "Cash\nBank"
   },
   {
    "fieldname": "irn",
@@ -85,23 +83,21 @@
   {
    "fieldname": "vat_amount",
    "fieldtype": "Currency",
-   "label": "VAT Amount"
+   "label": "VAT Amount",
+   "reqd": 1
   },
   {
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Pending\nSent to EIMS\nCompleted"
-  },
-  {
-   "fieldname": "date",
-   "fieldtype": "Datetime",
-   "label": "Date"
+   "options": "Pending\nSent to EIMS\nCompleted",
+   "reqd": 1
   },
   {
    "fieldname": "taxi_provider_name",
    "fieldtype": "Data",
-   "label": "Taxi Provider Name"
+   "label": "Taxi Provider Name",
+   "reqd": 1
   },
   {
    "fieldname": "taxi_provider_email",
@@ -111,7 +107,8 @@
   {
    "fieldname": "taxi_provider_tin",
    "fieldtype": "Data",
-   "label": "Taxi Provider Tin "
+   "label": "Taxi Provider Tin ",
+   "reqd": 1
   },
   {
    "fieldname": "taxi_provider_phone",
@@ -126,7 +123,9 @@
   {
    "fieldname": "document_number",
    "fieldtype": "Data",
-   "label": "Document Number"
+   "in_list_view": 1,
+   "label": "Document Number",
+   "reqd": 1
   },
   {
    "fieldname": "invoice_counter",
@@ -144,20 +143,54 @@
    "label": "Description"
   },
   {
-   "fieldname": "rider__phone",
+   "fieldname": "tax_provider_address",
+   "fieldtype": "Data",
+   "label": "Tax Provider Address"
+  },
+  {
+   "fieldname": "rider_phone",
    "fieldtype": "Phone",
    "label": "Rider  Phone"
   },
   {
-   "fieldname": "tax_provider_address",
+   "fieldname": "payment_method",
+   "fieldtype": "Select",
+   "label": "Payment Method",
+   "options": "Cash\nBank"
+  },
+  {
+   "fieldname": "reference",
    "fieldtype": "Data",
-   "label": "Tax Provider Address"
+   "label": "Reference",
+   "reqd": 1
+  },
+  {
+   "fieldname": "previous_irn",
+   "fieldtype": "Data",
+   "label": "Previous Irn"
+  },
+  {
+   "fieldname": "invoice_date",
+   "fieldtype": "Datetime",
+   "label": "Invoice Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "total_amount",
+   "fieldtype": "Currency",
+   "label": "Total Amount",
+   "reqd": 1
+  },
+  {
+   "fieldname": "rider_tin",
+   "fieldtype": "Data",
+   "label": "Rider TIN"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-30 04:27:23.182637",
+ "modified": "2025-09-30 14:07:10.451974",
  "modified_by": "Administrator",
  "module": "Taxiye Eims Integration",
  "name": "Trip Invoice",

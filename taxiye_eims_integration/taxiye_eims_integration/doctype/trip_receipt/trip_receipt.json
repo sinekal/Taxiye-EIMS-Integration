@@ -14,20 +14,24 @@
   "vat_amount",
   "total_amount",
   "payment_method",
-  "receipt_status",
+  "status",
   "signer_qr"
  ],
  "fields": [
   {
    "fieldname": "invoice_id",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Invoice ID",
-   "options": "Trip Invoice"
+   "options": "Trip Invoice",
+   "reqd": 1
   },
   {
    "fieldname": "irn",
    "fieldtype": "Data",
-   "label": "IRN"
+   "in_list_view": 1,
+   "label": "IRN",
+   "reqd": 1
   },
   {
    "fieldname": "rrn",
@@ -52,34 +56,40 @@
   {
    "fieldname": "total_amount",
    "fieldtype": "Currency",
-   "label": "Total Amount Rider Paid"
+   "in_list_view": 1,
+   "label": "Total Amount Rider Paid",
+   "reqd": 1
   },
   {
    "fieldname": "payment_date",
    "fieldtype": "Data",
-   "label": "Payment Date"
+   "in_list_view": 1,
+   "label": "Payment Date",
+   "reqd": 1
   },
   {
    "fieldname": "payment_method",
    "fieldtype": "Data",
-   "label": "Payment Method"
-  },
-  {
-   "fieldname": "receipt_status",
-   "fieldtype": "Select",
-   "label": "Receipt Status",
-   "options": "Pending\nCreated\nFailed"
+   "label": "Payment Method",
+   "reqd": 1
   },
   {
    "fieldname": "signer_qr",
    "fieldtype": "Small Text",
    "label": "Signer QR"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Pending\nCreated\nFailed",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-30 00:35:52.841011",
+ "modified": "2025-09-30 13:48:54.473091",
  "modified_by": "Administrator",
  "module": "Taxiye Eims Integration",
  "name": "Trip Receipt",

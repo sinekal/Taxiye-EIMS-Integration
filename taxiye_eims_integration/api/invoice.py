@@ -3,6 +3,7 @@ import requests
 import frappe
 from frappe import _  # type: ignore
 import json
+import re
 from taxiye_eims_integration.api.fetch_trips import (
     get_rider_details,
     get_tax_provider_details,
@@ -11,27 +12,35 @@ from taxiye_eims_integration.api.fetch_trips import (
     get_payment_detail,
     get_reference_detail,
     get_item_details,
-    get_driver_details,compute_commission, compute_vat, compute_total
+    get_driver_details,
+    get_transaction_type,
+    get_source_system_detail,
 )
 from taxiye_eims_integration.utils.tasks import (
     compute_commission,
     compute_vat,
     compute_total,
 )
-from taxiye_eims_integration.utils.eims_invoice import save_eims_invoice,
-from pydantic import BaseModel, Field, validator
+from taxiye_eims_integration.utils.auth import extract_406_data, get_eims_headers_and_url, parse_ack_date
+from taxiye_eims_integration.utils.eims_invoice import (
+    save_eims_invoice, 
+    temporary_eims_invoice, 
+    get_last_eims_invoice, 
+    )
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 
 # Maximum retries for API submission
 max_retries = 5
 
 class InvoicePayload(BaseModel):
-    place_identifier: str
+    """Invoice payload model"""
     invoice_number: str
     taxi_provider_name: str
     taxi_provider_tin: str
     taxi_provider_address: str
     taxi_provider_phone: str
+    taxi_provider_email: Optional[str] = None
     rider_phone: Optional[str] = None
     rider_name: Optional[str] = None
     rider_tin: Optional[str] = None
@@ -42,14 +51,6 @@ class InvoicePayload(BaseModel):
     total_amount: float
     base_fare:float
 
-    # Validate email format manually
-    @field_validator("payer_email")
-    @classmethod
-    def validate_email(cls, v: Optional[str]) -> Optional[str]:
-        if v and not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", v):
-            raise ValueError("Invalid email format")
-        return v
-
     # Date validation
     @field_validator("date")
     @classmethod
@@ -57,19 +58,6 @@ class InvoicePayload(BaseModel):
         if not re.match(r"^\d{4}-\d{2}-\d{2}$", v):
             raise ValueError("date must be in YYYY-MM-DD format")
         return v
-
-   
-
-def get_items_information(payload):
-    """Prepare item and value details for invoice"""
-    return get_item_details(
-        payload,
-        unit_price=payload.commission_rate,
-        Quantity=payload.base_fare,
-        commission_amount=payload.compute_commission,
-        vat_amount=payload.compute_vat,
-        total_amount=payload.compute_total,
-    )
 
 
 def prepare_invoice_request_body(payload, last_doc):
@@ -84,7 +72,7 @@ def prepare_invoice_request_body(payload, last_doc):
         invoice_counter = 1
         previous_irn = None
 
-    item_list, value_details = get_items_information(payload)
+    item_list, value_details = get_item_details(payload)
     tax_provider = get_tax_provider_details(payload)
     rider = get_rider_details(payload)
     driver = get_driver_details(payload)
@@ -99,6 +87,7 @@ def prepare_invoice_request_body(payload, last_doc):
         "DriverDetails": driver,
         "TaxProviderDetails": tax_provider,
         "ValueDetails": value_details,
+        "TransactionType": get_transaction_type("B2C"),
         "Version": "1",
     }
 
@@ -140,8 +129,7 @@ def save_invoice_for_internal_reference(last_doc, data, payload):
         invoice_counter = 1
         previous_irn = None
 
-    invoice_number = getattr(payload, "trip_id", 1)
-
+    ackDate_clean = parse_ack_date(acknowledged_date)
     invoice = save_eims_invoice(
         document_number=document_number,
         invoice_counter=invoice_counter,
@@ -151,7 +139,7 @@ def save_invoice_for_internal_reference(last_doc, data, payload):
         total_amount=payload.total_amount,
         status="Completed",
         signed_qr=signed_qr,
-        acknowledged_date=acknowledged_date,
+        acknowledged_date=ackDate_clean,
         signed_invoice=signed_invoice,
         taxi_provider_name=payload.taxi_provider_name,
         taxi_provider_tin=payload.taxi_provider_tin,
@@ -160,10 +148,10 @@ def save_invoice_for_internal_reference(last_doc, data, payload):
         date=payload.date,
         base_fare=payload.base_fare,
         commission_amount=payload.commission_amount,
-        invoice_number=invoice_number,
+        invoice_number=payload.invoice_number,
         description=payload.description,
         rider_name=payload.rider_name,
-        rider_phone=getattr(payload, "rider__phone", None),
+        rider_phone=payload.rider_phone,
         rider_tin=payload.rider_tin,
     )
 
@@ -172,12 +160,12 @@ def save_invoice_for_internal_reference(last_doc, data, payload):
         "message": "Invoice has been created successfully",
         "data": {
             "invoice_id": invoice.name,
-            "invoice_number": invoice_number,
+            "invoice_number": payload.invoice_number,
             "taxi_provider_name": payload.taxi_provider_name,
             "taxi_provider_tin": payload.taxi_provider_tin,
             "taxi_provider_phone": payload.taxi_provider_phone,
             "rider_name": payload.rider_name,
-            "rider_phone": getattr(payload, "rider__phone", None),
+            "rider_phone": payload.rider_phone,
             "rider_tin": payload.rider_tin,
             "date": payload.date,
             "description": payload.description,
@@ -188,7 +176,7 @@ def save_invoice_for_internal_reference(last_doc, data, payload):
             "irn": irn,
             "signed_qr": signed_qr,
             "signed_invoice": signed_invoice,
-            "acknowledged_date": acknowledged_date,
+            "acknowledged_date": ackDate_clean,
             "document_number": document_number,
             "invoice_counter": invoice_counter,
             "status": "Succeed",
@@ -197,19 +185,22 @@ def save_invoice_for_internal_reference(last_doc, data, payload):
 
 
 @frappe.whitelist()
-def create_invoice():
-    """Main function to create invoice and push to EIMS"""
+def create_invoice(max_retries=5):
 
     headers, url = get_eims_headers_and_url()
     submit_url = f"{url}/register"
 
+    # Fetch last invoice
     last_doc = get_last_eims_invoice()
 
-    raw_data = frappe.request.get_data(as_text=True)
+    raw_data = frappe.request.get_data(as_text=True)  # type: ignore
     if not raw_data:
-        frappe.throw(_("Empty request body"))
+        frappe.throw(_("Empty request body"))  # type: ignore
 
+    # Parse JSON
     data = json.loads(raw_data)
+
+    # Validate incoming payload
     validated_data = InvoicePayload(**data)
 
     payload = prepare_invoice_request_body(validated_data, last_doc)
@@ -219,20 +210,28 @@ def create_invoice():
         data = response.json()
 
         if data.get("statusCode") in (406, 417):
-            latest_doc_number, latest_invoice_counter = extract_doc_no_and_invoice_count(data)
+            # Sequence error: create temporary invoice and retry
+            latest_doc_number, latest_invoice_counter = (
+                extract_doc_no_and_invoice_count(data)
+            )
+            temporary_eims_invoice(latest_doc_number, latest_invoice_counter)
             last_doc = get_last_eims_invoice()
-            payload = prepare_invoice_request_body(validated_data, last_doc)
+            payload = prepare_invoice_request_body(validated_data, last_doc)  # type: ignore
+            # prevalidate_invoice_payload(payload)
             continue
 
         elif data.get("message") == "Too many requests!":
-            delay = min(2**attempt, 10)
-            frappe.logger().info(f"Rate limited. Retrying in {delay} seconds...")
+            # Rate limit: exponential backoff
+            delay = min(2**attempt, 10)  # max 10 seconds
+            print(f"Rate limited. Retrying in {delay} seconds...")  # type: ignore
             time.sleep(delay)
             continue
 
         else:
+            # Success
             last_doc = get_last_eims_invoice()
             result = save_invoice_for_internal_reference(last_doc, data, validated_data)
             return result
-
-    raise Exception("Failed to submit invoice: Too many requests repeatedly.")
+            # break
+    else:
+        raise Exception("Failed to submit invoice: Too many requests repeatedly.")

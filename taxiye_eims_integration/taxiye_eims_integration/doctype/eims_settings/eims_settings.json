@@ -1,188 +1,188 @@
 {
-    "actions": [],
-    "allow_rename": 1,
-    "creation": "2025-09-29 10:55:49.976722",
-    "doctype": "DocType",
-    "engine": "InnoDB",
-    "field_order": [
-        "eims_credentials_section",
-        "client_id",
-        "client_secret",
-        "api_key",
-        "column_break_xnwd",
-        "tin",
-        "mor_base_url",
-        "seller_information_section",
-        "legalname",
-        "email",
-        "phone",
-        "region",
-        "city",
-        "vatnumber",
-        "seller_tin",
-        "column_break_kmlb",
-        "subcity",
-        "woreda",
-        "housenumber",
-        "locality",
-        "systemnumber",
-        "systemtype"
-    ],
-    "fields": [
-        {
-            "fieldname": "eims_credentials_section",
-            "fieldtype": "Section Break",
-            "label": "EIMS Credentials"
-        },
-        {
-            "fieldname": "tin",
-            "fieldtype": "Password",
-            "in_list_view": 1,
-            "label": "TIN",
-            "reqd": 1
-        },
-        {
-            "fieldname": "column_break_xnwd",
-            "fieldtype": "Column Break"
-        },
-        {
-            "fieldname": "seller_information_section",
-            "fieldtype": "Section Break",
-            "label": "Seller Information"
-        },
-        {
-            "fieldname": "legalname",
-            "fieldtype": "Data",
-            "label": "Legal Name",
-            "reqd": 1
-        },
-        {
-            "fieldname": "email",
-            "fieldtype": "Data",
-            "label": "Email",
-            "reqd": 1
-        },
-        {
-            "fieldname": "phone",
-            "fieldtype": "Data",
-            "label": "Phone Number",
-            "reqd": 1
-        },
-        {
-            "fieldname": "region",
-            "fieldtype": "Data",
-            "label": "Region",
-            "reqd": 1
-        },
-        {
-            "fieldname": "city",
-            "fieldtype": "Data",
-            "label": "City"
-        },
-        {
-            "fieldname": "column_break_kmlb",
-            "fieldtype": "Column Break"
-        },
-        {
-            "fieldname": "subcity",
-            "fieldtype": "Data",
-            "label": "Subcity"
-        },
-        {
-            "fieldname": "woreda",
-            "fieldtype": "Data",
-            "label": "Woreda",
-            "reqd": 1
-        },
-        {
-            "fieldname": "housenumber",
-            "fieldtype": "Data",
-            "label": "House Number"
-        },
-        {
-            "fieldname": "locality",
-            "fieldtype": "Data",
-            "label": "Locality"
-        },
-        {
-            "fieldname": "systemnumber",
-            "fieldtype": "Password",
-            "label": "System Number",
-            "reqd": 1
-        },
-        {
-            "fieldname": "vatnumber",
-            "fieldtype": "Password",
-            "label": "VAT Number"
-        },
-        {
-            "default": "POS",
-            "fieldname": "systemtype",
-            "fieldtype": "Select",
-            "label": "System Type",
-            "options": "POS",
-            "reqd": 1
-        },
-        {
-            "fieldname": "client_id",
-            "fieldtype": "Password",
-            "in_list_view": 1,
-            "label": "Client ID",
-            "reqd": 1
-        },
-        {
-            "fieldname": "client_secret",
-            "fieldtype": "Password",
-            "in_list_view": 1,
-            "label": "Client Secret",
-            "reqd": 1
-        },
-        {
-            "fieldname": "api_key",
-            "fieldtype": "Password",
-            "in_list_view": 1,
-            "label": "API Key",
-            "reqd": 1
-        },
-        {
-            "default": "http://core.mor.gov.et",
-            "fieldname": "mor_base_url",
-            "fieldtype": "Data",
-            "label": "MoR BASE URL",
-            "reqd": 1
-        },
-        {
-            "fieldname": "seller_tin",
-            "fieldtype": "Password",
-            "label": "Seller TIN",
-            "reqd": 1
-        }
-    ],
-    "grid_page_length": 50,
-    "index_web_pages_for_search": 1,
-    "links": [],
-    "modified": "2025-09-30 01:24:09.370017",
-    "modified_by": "Administrator",
-    "module": "Taxiye Eims Integration",
-    "name": "EIMS Settings",
-    "owner": "Administrator",
-    "permissions": [
-        {
-            "create": 1,
-            "delete": 1,
-            "email": 1,
-            "export": 1,
-            "print": 1,
-            "read": 1,
-            "report": 1,
-            "role": "System Manager",
-            "share": 1,
-            "write": 1
-        }
-    ],
-    "row_format": "Dynamic",
-    "rows_threshold_for_grid_search": 20,
-    "sort_field": "creation",
-    "sort_order": "DESC",
-    "states": []
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-29 10:55:49.976722",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "eims_credentials_section",
+  "client_id",
+  "client_secret",
+  "api_key",
+  "column_break_xnwd",
+  "tin",
+  "mor_base_url",
+  "driver_information_section",
+  "legalname",
+  "email",
+  "phone",
+  "region",
+  "city",
+  "vatnumber",
+  "seller_tin",
+  "column_break_kmlb",
+  "subcity",
+  "woreda",
+  "housenumber",
+  "locality",
+  "systemnumber",
+  "systemtype"
+ ],
+ "fields": [
+  {
+   "fieldname": "eims_credentials_section",
+   "fieldtype": "Section Break",
+   "label": "EIMS Credentials"
+  },
+  {
+   "fieldname": "tin",
+   "fieldtype": "Password",
+   "in_list_view": 1,
+   "label": "TIN",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_xnwd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "legalname",
+   "fieldtype": "Data",
+   "label": "Legal Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email",
+   "reqd": 1
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "label": "Phone Number",
+   "reqd": 1
+  },
+  {
+   "fieldname": "region",
+   "fieldtype": "Data",
+   "label": "Region",
+   "reqd": 1
+  },
+  {
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "label": "City"
+  },
+  {
+   "fieldname": "column_break_kmlb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "subcity",
+   "fieldtype": "Data",
+   "label": "Subcity"
+  },
+  {
+   "fieldname": "woreda",
+   "fieldtype": "Data",
+   "label": "Woreda",
+   "reqd": 1
+  },
+  {
+   "fieldname": "housenumber",
+   "fieldtype": "Data",
+   "label": "House Number"
+  },
+  {
+   "fieldname": "locality",
+   "fieldtype": "Data",
+   "label": "Locality"
+  },
+  {
+   "fieldname": "systemnumber",
+   "fieldtype": "Password",
+   "label": "System Number",
+   "reqd": 1
+  },
+  {
+   "fieldname": "vatnumber",
+   "fieldtype": "Password",
+   "label": "VAT Number"
+  },
+  {
+   "fieldname": "client_id",
+   "fieldtype": "Password",
+   "in_list_view": 1,
+   "label": "Client ID",
+   "reqd": 1
+  },
+  {
+   "fieldname": "client_secret",
+   "fieldtype": "Password",
+   "in_list_view": 1,
+   "label": "Client Secret",
+   "reqd": 1
+  },
+  {
+   "fieldname": "api_key",
+   "fieldtype": "Password",
+   "in_list_view": 1,
+   "label": "API Key",
+   "reqd": 1
+  },
+  {
+   "default": "http://core.mor.gov.et",
+   "fieldname": "mor_base_url",
+   "fieldtype": "Data",
+   "label": "MoR BASE URL",
+   "reqd": 1
+  },
+  {
+   "fieldname": "seller_tin",
+   "fieldtype": "Password",
+   "label": "Seller TIN",
+   "reqd": 1
+  },
+  {
+   "fieldname": "driver_information_section",
+   "fieldtype": "Section Break",
+   "label": "Driver  Information"
+  },
+  {
+   "default": "POS",
+   "fieldname": "systemtype",
+   "fieldtype": "Select",
+   "label": "System Type",
+   "options": "POS",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-09-30 17:27:12.268798",
+ "modified_by": "Administrator",
+ "module": "Taxiye Eims Integration",
+ "name": "EIMS Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
 }

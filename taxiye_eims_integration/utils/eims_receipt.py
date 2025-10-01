@@ -6,7 +6,7 @@ def save_eims_receipt(
     rrn: str,
     payment_method: str,
     payment_date: str,
-    payment_amount: float,
+    total_amount: float,
     vat_amount: float,
     base_fare: float,
     commission_amount: float,
@@ -24,7 +24,7 @@ def save_eims_receipt(
     receipt_doc.rrn = rrn                                         # Receipt Reference Number
     receipt_doc.payment_method = payment_method                   # Payment Method
     receipt_doc.payment_date = payment_date                       # Payment Date (YYYY-MM-DD)
-    receipt_doc.payment_amount = payment_amount                   # Payment Amount
+    receipt_doc.total_amount = total_amount                   # Payment Amount
     receipt_doc.vat_amount = vat_amount                             # VAT Amount
     receipt_doc.status = status                                   # Receipt Status (Draft/Created/Acknowledged/Failed)
     receipt_doc.signer_qr = signer_qr                             # Signer QR
