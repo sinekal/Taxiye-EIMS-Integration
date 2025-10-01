@@ -55,7 +55,7 @@ def get_item_details(payload):
             "Unit": "PCs",
             "Discount": 0,
             "UnitPrice": float(payload.commission_rate),
-            "NatureOfSupplies": "services",
+            "NatureOfSupplies": "goods",
         }
 
     item_list = [item]
