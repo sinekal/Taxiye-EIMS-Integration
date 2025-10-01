@@ -6,8 +6,8 @@ def save_eims_receipt(
     rrn: str,
     payment_method: str,
     payment_date: str,
-    total_amount: float,
-    vat_amount: float,
+    total_payment: float,
+    tax: float,
     base_fare: float,
     commission_amount: float,
     status: str,
@@ -23,9 +23,11 @@ def save_eims_receipt(
     receipt_doc.irn = irn                                         # ERCA Invoice Reference Number
     receipt_doc.rrn = rrn                                         # Receipt Reference Number
     receipt_doc.payment_method = payment_method                   # Payment Method
-    receipt_doc.payment_date = payment_date                       # Payment Date (YYYY-MM-DD)
-    receipt_doc.total_amount = total_amount                   # Payment Amount
-    receipt_doc.vat_amount = vat_amount                             # VAT Amount
+    receipt_doc.payment_date = payment_date 
+    receipt_doc.base_fare = base_fare
+    receipt_doc.commission_amount = commission_amount
+    receipt_doc.total_payment = total_payment                     # Payment Amount
+    receipt_doc.tax = tax                             # VAT Amount
     receipt_doc.status = status                                   # Receipt Status (Draft/Created/Acknowledged/Failed)
     receipt_doc.signer_qr = signer_qr                             # Signer QR
 

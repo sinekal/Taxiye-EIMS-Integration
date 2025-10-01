@@ -19,8 +19,9 @@ def save_eims_invoice(
     previous_irn: str | None,
     base_fare: float,
     commission_amount: float,
-    vat_amount: float,
-    total_amount: float,
+    tax: float,
+    amount: float,
+    total_payment: float,
     status: str,
     signed_qr: str,
     acknowledged_date,
@@ -29,7 +30,9 @@ def save_eims_invoice(
     taxi_provider_tin: str,
     taxi_provider_phone: str | None,
     taxi_provider_email: str | None,
+    reference: str,
     date,
+    time,
     description: str = "",
     # New fields
     rider_name: str | None = None,
@@ -44,21 +47,27 @@ def save_eims_invoice(
     transaction_doc.taxi_provider_tin = taxi_provider_tin
     transaction_doc.invoice_number = invoice_number
     transaction_doc.date = date
+    transaction_doc.time = time
+    transaction_doc.reference = reference
     
 
     # Optional rider information
     transaction_doc.rider_name = rider_name
     transaction_doc.rider_phone = rider_phone
+    transaction_doc.rider_tin = rider_tin or None
+    transaction_doc.rider_email = rider_email or None
+      # Assuming rider TIN is not provided
 
     # Other fields
     transaction_doc.document_number = document_number
     transaction_doc.invoice_counter = invoice_counter
     transaction_doc.irn = irn
     transaction_doc.previous_irn = previous_irn
-    transaction_doc.vat_amount = vat_amount
+    transaction_doc.tax = tax_amount
+    transaction_doc.amount = amount
     transaction_doc.commission_amount = commission_amount
     transaction_doc.base_fare = base_fare
-    transaction_doc.total_amount = total_amount
+    transaction_doc.total_payment = total_payment
     transaction_doc.status = status
     transaction_doc.signed_qr = signed_qr
     transaction_doc.signed_invoice = signed_invoice
@@ -82,7 +91,7 @@ def temporary_eims_invoice(document_number, invoice_counter):
     transaction_doc.date = now_datetime().date()
     transaction_doc.reference = f"REF-{invoice_counter}"
     transaction_doc.amount = 0
-    transaction_doc.total_amount = 0
+    transaction_doc.total_payment = 0
     transaction_doc.status = "Pending"  # must be one of: pending, sent to EIMS, acknowledged, completed, failed
 
     # --- Optional / placeholder fields ---

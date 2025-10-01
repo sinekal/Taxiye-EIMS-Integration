@@ -26,8 +26,9 @@
   "base_fare",
   "commission_rate",
   "commission_amount",
-  "vat_amount",
-  "total_amount",
+  "tax",
+  "amount",
+  "total_payment",
   "status",
   "acknowledged_date",
   "document_number",
@@ -77,15 +78,10 @@
    "label": "Commission Rate"
   },
   {
+   "description": "base fare *  commission rate",
    "fieldname": "commission_amount",
    "fieldtype": "Currency",
    "label": "Commission Amount"
-  },
-  {
-   "fieldname": "vat_amount",
-   "fieldtype": "Currency",
-   "label": "VAT Amount",
-   "reqd": 1
   },
   {
    "fieldname": "status",
@@ -171,12 +167,6 @@
    "label": "Previous Irn"
   },
   {
-   "fieldname": "total_amount",
-   "fieldtype": "Currency",
-   "label": "Total Amount",
-   "reqd": 1
-  },
-  {
    "fieldname": "rider_tin",
    "fieldtype": "Data",
    "label": "Rider TIN"
@@ -191,12 +181,32 @@
    "fieldname": "time",
    "fieldtype": "Time",
    "label": "Time"
+  },
+  {
+   "description": "Vat Amount = (base fare + commission amount)*15%",
+   "fieldname": "tax",
+   "fieldtype": "Currency",
+   "label": "Tax",
+   "reqd": 1
+  },
+  {
+   "description": "base fare + commission amount",
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount",
+   "reqd": 1
+  },
+  {
+   "description": "total payment rider paid = base fare + commission amount + tax",
+   "fieldname": "total_payment",
+   "fieldtype": "Currency",
+   "label": "Total Payment"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-01 10:14:17.649588",
+ "modified": "2025-10-01 13:12:11.112696",
  "modified_by": "Administrator",
  "module": "Taxiye Eims Integration",
  "name": "Trip Invoice",

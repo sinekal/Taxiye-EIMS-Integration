@@ -3,20 +3,9 @@ import random
 import frappe
 import requests
 from taxiye_eims_integration.api.fetch_trips import (
-    get_rider_details,
-    get_tax_provider_details,
-    get_last_trip_invoice,
-    get_document_detail,
     get_payment_detail,
-    get_reference_detail,
-    get_item_details,
     get_driver_details,
     clean_tin_no
-)
-from taxiye_eims_integration.utils.tasks import (
-    compute_commission,
-    compute_vat,
-    compute_total,
 )
 from taxiye_eims_integration.utils.auth import get_eims_headers_and_url
 from taxiye_eims_integration.utils.eims_receipt import save_eims_receipt
@@ -36,16 +25,9 @@ class PaymentModel(BaseModel):
 class ReceiptModel(BaseModel):
     invoice_id: str = Field(..., description="Unique invoice ID")
     irn: str = Field(..., description="Invoice Reference Number")
-    payment_status: str = Field("Paid", description="Payment status, always 'Paid'")
+    status: str 
     signer_qr: Optional[str] = Field(None, description="Signer QR code")
-
-    # Optional: validation to ensure payment_status is always 'Paid'
-    @validator("payment_status")
-    def validate_payment_status(cls, v):
-        if v != "Paid":
-            raise ValueError("payment_status must be 'Paid'")
-        return v
-
+    payment: PaymentModel
 
 
 @frappe.whitelist()  # type: ignore
@@ -75,16 +57,22 @@ def create_receipt():
     if invoices:
         invoice = invoices[0]
         irn = invoice.irn  # type: ignore
-        total_amount = invoice.compute_total  # type: ignore
+        total_amount = invoice.total_payment  # type: ignore
         document_number = invoice.document_number  # type: ignore
-        vat_amount = invoice.compute_vat  # type: ignore
+        tax_amount = invoice.tax  # type: ignore
+    collected_amount = payload.payment.amount + payload.payment.tax
 
+    if collected_amount != total_amount:
+        frappe.throw(  # type: ignore
+            "CollectedAmount must be equal to TotalAmount (invoice's TotalValue)"
+        )
     seller_tin= clean_tin_no(driver_info["seller_tin"])
+    discount_amount = 0
 
     receipt_counter = str(random.randint(10000, 99999))
     manual_receipt_number = str(random.randint(10000, 99999))
 
-    payment_method= get_payment_detail()
+    mode_of_payment = get_payment_detail()
 
     time_str = "00:00:00"
 
@@ -102,24 +90,26 @@ def create_receipt():
         "ManualReceiptNumber": str(manual_receipt_number),
         "SourceSystemType": "POS",
         "SourceSystemNumber": driver_info.get("systemnumber", ""),
-        "PaymentMode": payment_method["Cash"],
         "ReceiptCurrency": "ETB",
+        "CollectedAmount": collected_amount,
         "ExchangeRate": None,
         "SellerTIN": seller_tin,
         "Invoices": [
             {
                 "InvoiceIRN": irn,
                 "PaymentCoverage": "FULL",
+                "InvoicePaidAmount": total_amount,
+                "DiscountAmount": discount_amount,
                 "RemainingAmount": None,
-                "TotalAmount": compute_total(base_fare, commission_amount, vat_amount),
+                "TotalAmount": total_amount,
             }
         ],
         "TransactionDetails": {
-            "ModeOfPayment": payment_method["Cash"],
+            "ModeOfPayment": mode_of_payment["Mode"],
             "ChequeNumber": None,
             "CPONumber": None,
             "DocumentNumber": document_number,
-            "PaymentServiceProvider": payload.payment.method or "Cash",
+            "PaymentServiceProvider": payload.payment.method or "Bank",
             "AccountNumber": payload.payment.accountNumber or None,
             "TransactionNumber": payload.payment.transactionNumber or None,
         },
@@ -142,10 +132,12 @@ def create_receipt():
         invoice_id=payload.invoice_id,  # Must be a valid USP Invoice ID
         irn=irn,  # type: ignore
         rrn=rrn,
-        payment_mode=payload.payment.mode,
+        payment_method=payload.payment.method,
         payment_date=str(date_str),
-        total_amount=compute_total(base_fare, commission_amount, vat_amount),
-        vat_amount=compute_vat(base_fare, commission_amount),
+        total_payment=total_amount,
+        tax = tax_amount,
+        commission_amount = commission_amount,
+        base_fare = base_fare,
         commission_amount=compute_commission(base_fare, commission_rate),
         status="Acknowledged",
         signer_qr=signer_qr,
@@ -165,15 +157,17 @@ def create_receipt():
             "driver_tin": invoice.driver_tin if invoice else None,
             "rider_name": invoice.rider_name if invoice else None,
             "rider_phone": invoice.rider_phone if invoice else None,
+            "time": invoice.time if invoice else None,
             "date": invoice.date if invoice else None,
             "description": invoice.description if invoice else None,
             "rrn": rrn,
             "qr": qr,
             "status": "Acknowledged",
             "payment": {
-                "total_amount": compute_total(base_fare, commission_amount, vat_amount),
-                "vat_amount": compute_vat(base_fare, commission_amount),
-                "commission_amount": compute_commission(base_fare, commission_rate),
+                "amount": total_amount,
+                "tax": tax_amount,
+                "commission_amount": commission_amount,
+                "base_fare": base_fare,
                 "date": date_str,
                 "method": payload.payment.method,
             },

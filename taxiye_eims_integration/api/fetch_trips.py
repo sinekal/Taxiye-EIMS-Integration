@@ -1,13 +1,9 @@
-from taxiye_eims_integration.utils.tasks import (
-    compute_commission,
-    compute_vat,
-    compute_total,
-)
 import frappe
 from frappe import _  # type: ignore
 from frappe.utils import now_datetime  # type: ignore
 import json
 import re
+from taxiye_eims_integration.utils.date import safe_format_posting_date
 from frappe.utils.password import get_decrypted_password # type: ignore
 
 #clean TIN Number
@@ -26,39 +22,48 @@ def get_rider_details(payload) -> dict:
     """Extract rider details"""
     rider_tin = clean_tin_no(payload.rider_tin)
     rider_details = {
-        "City": payload.taxi_provider_address,
-        "Phone": payload.rider_phone,
+        "City": payload.rider_city or None,
+        "Phone": payload.rider_phone or None,
+        "Email": payload.rider_email or None,
+        "Housenumber": payload.housenumber or None,
+        "IdType": "PST",  # Assuming passport as default
+        "IdNumber": payload.id_number or None,
         "Tin": rider_tin or None,
-        "Legal Name": payload.rider_name,
-        "Email": payload.rider_email,
+        "LegalName": payload.rider_name,
         "Region": None,
-        "city": None,
+        "City": None,
         "Wereda": None,
     }
     return rider_details
 #item details
 def get_item_details(payload): 
     """Extract item and value details for Trip Invoice"""
+    commission_amount=float(payload.base_fare*payload.commission_rate)
+    amount=float(payload.base_fare+commission_amount)
+    tax=float((payload.base_fare+commission_amount)*0.15)
+    total_payment=float(payload.base_fare+commission_amount+tax)
 
     item = {
             "ItemCode": payload.reference,
             "ProductDescription": payload.description,
+            "PreTaxValue": amount,
             "Quantity": payload.quantity,
             "LineNumber": payload.line_number or 1,
-            "VatAmount": vat_amount,
-            "TotalLineAmount": total_amount,
+            "TaxAmount": tax,
+            "TaxCode": "VAT15" or None,
+            "TotalLineAmount": total_payment,
             "Unit": "PCs",
-            "UnitPrice": commission_rate,
+            "Discount": 0,
+            "UnitPrice": float(payload.commission_rate),
             "NatureOfSupplies": "services",
         }
 
     item_list = [item]
 
     value_details = {
-        "vat_amount": payload.compute_vat,
-        "total_amount": payload.compute_total,
-        "commission_amount": payload.compute_commission,
-        "currency": "ETB",
+        "TaxValue": tax,
+        "TotalValue": total_payment,
+        "InvoiceCurrency": "ETB",
     }
 
     return item_list, value_details
@@ -94,8 +99,8 @@ def get_driver_details():
         "locality": settings.locality,  
         "phone": clean_phone(settings.phone), 
         "region": settings.region,  
-        "subcity": settings.subcity,
         "woreda": settings.woreda,
+        "subcity": settings.subcity,
         "systemtype": settings.systemtype,
         "tin": clean_tin_no(get_decrypted_password("EIMS Settings", "EIMS Settings", "tin")) or "0079140416",
         "seller_tin": clean_tin_no(get_decrypted_password("EIMS Settings", "EIMS Settings", "seller_tin")) or "0079140416",
@@ -124,20 +129,23 @@ def get_last_trip_invoice(taxi_provider_tin: str):
     return None
 
 def get_document_detail(payload, document_number):
-    date_obj = getattr(payload, "date", None)
-    date_str = date_obj.strftime("%Y-%m-%d") if date_obj else None
-    
-    document_detail = {
-        "document_number": document_number,
-        "date": date_str,
-        "document_type": "INV",
+    date = payload.date
+    time = payload.time
+
+    date_str = safe_format_posting_date(date)
+    time_str = str(time) if time else "00:00:00"
+
+    return {
+        "DocumentNumber": document_number,
+        "Date": f"{date_str}T{time_str}",
+        "Type": "INV",
     }
-    return document_detail
 
 
 def get_payment_detail():
     return {
         "Mode": "CASH",
+        "PaymentTerm": "IMMEDIATE",
     }
 
 
@@ -155,7 +163,7 @@ def get_transaction_type(transaction_type):
 def get_source_system_detail(payload, invoice_counter):
 
     return {
-        "driver_name": payload.driver_name,
+        # "CashierName": payload.taxi_provider_name,
         "InvoiceCounter": invoice_counter,
         "SystemNumber": get_decrypted_password(
             "EIMS Settings", "EIMS Settings", "systemnumber"
