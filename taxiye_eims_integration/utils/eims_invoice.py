@@ -54,16 +54,15 @@ def save_eims_invoice(
     # Optional rider information
     transaction_doc.rider_name = rider_name
     transaction_doc.rider_phone = rider_phone
-    transaction_doc.rider_tin = rider_tin or None
-    transaction_doc.rider_email = rider_email or None
-      # Assuming rider TIN is not provided
+    # Note: rider_tin and rider_email are not provided in function parameters
+    # These fields are optional and will be None if not provided
 
     # Other fields
     transaction_doc.document_number = document_number
     transaction_doc.invoice_counter = invoice_counter
     transaction_doc.irn = irn
     transaction_doc.previous_irn = previous_irn
-    transaction_doc.tax = tax_amount
+    transaction_doc.tax = tax
     transaction_doc.amount = amount
     transaction_doc.commission_amount = commission_amount
     transaction_doc.base_fare = base_fare

@@ -2,6 +2,7 @@ import json
 import random
 import frappe
 import requests
+import datetime
 from taxiye_eims_integration.api.fetch_trips import (
     get_payment_detail,
     get_driver_details,
@@ -128,19 +129,22 @@ def create_receipt():
     rrn = body.get("rrn")
     qr = body.get("qr")
 
+    # Calculate commission amount from invoice data
+    commission_amount = invoice.commission_amount if invoice else 0
+    base_fare = invoice.base_fare if invoice else 0
+    
     save_eims_receipt(
-        invoice_id=payload.invoice_id,  # Must be a valid USP Invoice ID
+        invoice_id=payload.invoice_id,  # Must be a valid Trip Invoice ID
         irn=irn,  # type: ignore
         rrn=rrn,
         payment_method=payload.payment.method,
         payment_date=str(date_str),
         total_payment=total_amount,
-        tax = tax_amount,
-        commission_amount = commission_amount,
-        base_fare = base_fare,
-        commission_amount=compute_commission(base_fare, commission_rate),
+        tax=tax_amount,
+        commission_amount=commission_amount,
+        base_fare=base_fare,
         status="Acknowledged",
-        signer_qr=signer_qr,
+        signer_qr=qr,
     )
 
     result = {
@@ -152,9 +156,9 @@ def create_receipt():
             "taxi_provider_name": invoice.taxi_provider_name if invoice else None,
             "taxi_provider_tin": invoice.taxi_provider_tin if invoice else None,
             "taxi_provider_phone": invoice.taxi_provider_phone if invoice else None,
-            "driver_name": invoice.driver_name if invoice else None,
-            "driver_phone": invoice.driver_phone if invoice else None,
-            "driver_tin": invoice.driver_tin if invoice else None,
+            "driver_name": invoice.taxi_provider_name if invoice else None,
+            "driver_phone": invoice.taxi_provider_phone if invoice else None,
+            "driver_tin": invoice.taxi_provider_tin if invoice else None,
             "rider_name": invoice.rider_name if invoice else None,
             "rider_phone": invoice.rider_phone if invoice else None,
             "time": invoice.time if invoice else None,

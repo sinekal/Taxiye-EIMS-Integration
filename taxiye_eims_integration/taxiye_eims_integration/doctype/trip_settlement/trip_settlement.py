@@ -5,8 +5,8 @@
 import frappe
 from frappe.model.document import Document
 
-def TripSettlement(Document):
-    pass
+class TripSettlement(Document):
+	pass
 #     frappe.get_doc({
 #         "doctype": "Trip Settlement",
 #         "trip_id": invoice_doc.name,

@@ -17,6 +17,21 @@ def clean_tin_no(tin):
         return ""
 
     return tinClean
+
+#clean phone number
+def clean_phone(phone):
+    """Clean and format phone number with Ethiopian country code."""
+    if not phone:
+        return ""
+    
+    # Remove all non-numeric characters
+    cleaned = re.sub(r'\D', '', phone)
+    
+    # Add Ethiopian country code if missing
+    if not cleaned.startswith('251'):
+        cleaned = '251' + cleaned
+    
+    return '+' + cleaned
 #GET passenger(rider) information
 def get_rider_details(payload) -> dict:
     """Extract rider details"""

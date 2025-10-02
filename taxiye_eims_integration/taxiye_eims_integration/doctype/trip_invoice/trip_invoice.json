@@ -4,7 +4,7 @@
  "creation": "2025-09-29 00:39:57.130331",
  "doctype": "DocType",
  "engine": "InnoDB",
- "field_order": [
+  "field_order": [
   "date",
   "time",
   "taxi_provider_name",
@@ -30,6 +30,7 @@
   "amount",
   "total_payment",
   "status",
+  "settlement_status",
   "acknowledged_date",
   "document_number",
   "invoice_counter",
@@ -89,6 +90,12 @@
    "label": "Status",
    "options": "Pending\nSent to EIMS\nCompleted",
    "reqd": 1
+  },
+  {
+   "fieldname": "settlement_status",
+   "fieldtype": "Select",
+   "label": "Settlement Status",
+   "options": "Pending\nSettled\nFailed"
   },
   {
    "fieldname": "taxi_provider_name",

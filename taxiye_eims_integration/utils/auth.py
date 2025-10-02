@@ -3,9 +3,9 @@ import requests
 import frappe
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Dict, Any
-from taxiye_eims_integration.utils.tasks import get_driver_details
-
+from taxiye_eims_integration.api.fetch_trips import get_driver_details
 from frappe.utils.password import encrypt, decrypt  # type: ignore
+from frappe.utils import formatdate
 
 # Redis keys
 REDIS_KEY_ACCESS = "eims:access_token"
@@ -141,6 +141,10 @@ def get_eims_access_token():
 
 
 ################
+def get_seller_information():
+    """Get seller information from EIMS Settings"""
+    return get_driver_details()
+
 def get_eims_headers_and_url():
     seller_info = get_driver_details()
     token = get_eims_access_token()

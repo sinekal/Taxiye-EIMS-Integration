@@ -59,13 +59,6 @@ class InvoicePayload(BaseModel):
         if not re.match(r"^\d{4}-\d{2}-\d{2}$", v):
             raise ValueError("date must be in YYYY-MM-DD format")
         return v
-    #validate date
-     @field_validator("date")
-    @classmethod
-    def validate_date(cls, v: str) -> str:
-        if not re.match(r"^\d{4}-\d{2}-\d{2}$", v):
-            raise ValueError("date must be in YYYY-MM-DD format")
-        return v
 
     # Time validation
     @field_validator("time")
@@ -90,7 +83,7 @@ def prepare_invoice_request_body(payload, last_doc):
 
     item_list, value_details = get_item_details(payload)
     rider = get_rider_details(payload)
-    driver = get_driver_details(payload)
+    driver = get_driver_details()
     payment_info = get_payment_detail()
 
     payload_data = {
@@ -121,7 +114,8 @@ def extract_doc_no_and_invoice_count(data):
                 f"406 Error: Non-numeric values for document number ({latest_doc_number}) "
                 f"or invoice counter ({latest_invoice_counter})."
             )
-        return latest_doc_number_int - 1, latest_invoice_counter_int - 1
+        # Return the expected values directly (EIMS expects these exact numbers)
+        return latest_doc_number_int, latest_invoice_counter_int
     else:
         raise frappe.ValidationError(f"406 Error: {data}")
 
