@@ -69,17 +69,32 @@ class InvoicePayload(BaseModel):
         return v
 
 
-def prepare_invoice_request_body(payload, last_doc):
-    """Prepare payload for EIMS API submission"""
+def prepare_invoice_request_body(
+    payload,
+    last_doc,
+    override_document_number: int | None = None,
+    override_invoice_counter: int | None = None,
+    override_previous_irn: str | None = None,
+):
+    """Prepare payload for EIMS API submission.
 
-    if last_doc:
-        document_number = int(last_doc.document_number) + 1
-        invoice_counter = int(last_doc.invoice_counter) + 1
-        previous_irn = last_doc.irn
+    If override values are provided (e.g., from a 406/417 response), use them directly.
+    Otherwise, use the next numbers based on the last persisted invoice.
+    """
+
+    if override_document_number is not None and override_invoice_counter is not None:
+        document_number = int(override_document_number)
+        invoice_counter = int(override_invoice_counter)
+        previous_irn = override_previous_irn if override_previous_irn is not None else (last_doc.irn if last_doc else None)
     else:
-        document_number = 1
-        invoice_counter = 1
-        previous_irn = None
+        if last_doc:
+            document_number = int(last_doc.document_number) + 1
+            invoice_counter = int(last_doc.invoice_counter) + 1
+            previous_irn = last_doc.irn
+        else:
+            document_number = 1
+            invoice_counter = 1
+            previous_irn = None
 
     item_list, value_details = get_item_details(payload)
     rider = get_rider_details(payload)
@@ -93,7 +108,7 @@ def prepare_invoice_request_body(payload, last_doc):
         "PaymentDetails": payment_info,
         "ReferenceDetails": get_reference_detail(previous_irn),
         "SellerDetails": driver,
-        "SourceSystem": get_source_system_detail(payload, invoice_counter),  
+        "SourceSystem": get_source_system_detail(payload, invoice_counter),
         "ValueDetails": value_details,
         "TransactionType": get_transaction_type("B2C"),
         "Version": "1",
@@ -120,7 +135,13 @@ def extract_doc_no_and_invoice_count(data):
         raise frappe.ValidationError(f"406 Error: {data}")
 
 
-def save_invoice_for_internal_reference(last_doc, data, payload):
+def save_invoice_for_internal_reference(
+    last_doc,
+    data,
+    payload,
+    used_document_number: int | None = None,
+    used_invoice_counter: int | None = None,
+):
     """Save EIMS invoice response into Trip Invoice DocType"""
 
     body = data.get("body", {})
@@ -129,14 +150,20 @@ def save_invoice_for_internal_reference(last_doc, data, payload):
     acknowledged_date = body.get("acknowledged_date")
     signed_invoice = body.get("signedInvoice")
 
-    if last_doc:
-        document_number = int(last_doc.document_number) + 1
-        invoice_counter = int(last_doc.invoice_counter) + 1
-        previous_irn = last_doc.irn
+    # Use the exact numbers that were used in the successful request when provided.
+    if used_document_number is not None and used_invoice_counter is not None:
+        document_number = int(used_document_number)
+        invoice_counter = int(used_invoice_counter)
+        previous_irn = last_doc.irn if last_doc else None
     else:
-        document_number = 1
-        invoice_counter = 1
-        previous_irn = None
+        if last_doc:
+            document_number = int(last_doc.document_number) + 1
+            invoice_counter = int(last_doc.invoice_counter) + 1
+            previous_irn = last_doc.irn
+        else:
+            document_number = 1
+            invoice_counter = 1
+            previous_irn = None
 
     ackDate_clean = parse_ack_date(acknowledged_date)
     invoice = save_eims_invoice(
@@ -218,21 +245,39 @@ def create_invoice(max_retries=5):
     # Validate incoming payload
     validated_data = InvoicePayload(**data)
 
-    payload = prepare_invoice_request_body(validated_data, last_doc)
+    # Determine initial sequence numbers from our store
+    if last_doc:
+        current_document_number = int(last_doc.document_number) + 1
+        current_invoice_counter = int(last_doc.invoice_counter) + 1
+    else:
+        current_document_number = 1
+        current_invoice_counter = 1
+
+    # Build initial payload using computed numbers
+    payload = prepare_invoice_request_body(
+        validated_data,
+        last_doc,
+        override_document_number=current_document_number,
+        override_invoice_counter=current_invoice_counter,
+    )
 
     for attempt in range(1, max_retries + 1):
         response = requests.post(submit_url, json=payload, headers=headers)
         data = response.json()
 
         if data.get("statusCode") in (406, 417):
-            # Sequence error: create temporary invoice and retry
-            latest_doc_number, latest_invoice_counter = (
-                extract_doc_no_and_invoice_count(data)
+            # Use the exact expected numbers from the server and retry
+            latest_doc_number, latest_invoice_counter = extract_doc_no_and_invoice_count(data)
+            current_document_number = int(latest_doc_number)
+            current_invoice_counter = int(latest_invoice_counter)
+
+            # Rebuild payload with overrides; do NOT create temporary local invoices
+            payload = prepare_invoice_request_body(
+                validated_data,
+                last_doc,  # previous_irn remains based on last acknowledged doc
+                override_document_number=current_document_number,
+                override_invoice_counter=current_invoice_counter,
             )
-            temporary_eims_invoice(latest_doc_number, latest_invoice_counter)
-            last_doc = get_last_eims_invoice()
-            payload = prepare_invoice_request_body(validated_data, last_doc)  # type: ignore
-            # prevalidate_invoice_payload(payload)
             continue
 
         elif data.get("message") == "Too many requests!":
@@ -243,9 +288,15 @@ def create_invoice(max_retries=5):
             continue
 
         else:
-            # Success
+            # Success: persist using the exact numbers that were sent
             last_doc = get_last_eims_invoice()
-            result = save_invoice_for_internal_reference(last_doc, data, validated_data)
+            result = save_invoice_for_internal_reference(
+                last_doc,
+                data,
+                validated_data,
+                used_document_number=current_document_number,
+                used_invoice_counter=current_invoice_counter,
+            )
             return result
             # break
     else:
