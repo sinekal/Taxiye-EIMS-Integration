@@ -8,30 +8,6 @@ app_license = "mit"
 
 
 
-# API endpoints
-api_routes = [
-    "taxiye_eims_integration.api.taxiye_webhook.receive_completed_trip",
-    "taxiye_eims_integration.api.taxiye_webhook.process_payment",
-    "taxiye_eims_integration.api.taxiye_webhook.get_trip_status",
-    "taxiye_eims_integration.api.taxiye_webhook.send_receipt_to_taxiye",
-    "taxiye_eims_integration.api.invoice.create_invoice",
-    "taxiye_eims_integration.api.receipt.create_receipt",
-    "taxiye_eims_integration.api.sequence_sync.sync_sequence_with_eims",
-    "taxiye_eims_integration.api.sequence_sync.get_current_sequence",
-    "taxiye_eims_integration.api.sequence_sync.test_eims_connection",
-    "taxiye_eims_integration.api.sequence_sync.reset_sequence_to_eims_expected",
-    "taxiye_eims_integration.api.debug_invoice.debug_invoice_payload",
-    "taxiye_eims_integration.api.debug_invoice.test_invoice_with_sequence"
-]
-
-# doc_events = {
-#     "Trip Invoice": {
-#         "on_submit": "taxiye_eims_integration.taxiye_eims_integration.doctype.trip_invoice.trip_invoice.on_submit"
-#     },
-#     "Trip Receipt": {
-#         "on_submit": "taxiye_eims_integration.taxiye_eims_integration.doctype.trip_receipt.trip_receipt.on_submit"
-#     }
-# }
 
 
 
@@ -275,4 +251,3 @@ api_routes = [
 # default_log_clearing_doctypes = {
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
-

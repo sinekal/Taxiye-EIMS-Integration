@@ -115,8 +115,8 @@ def get_eims_access_token():
     eth_tz = timezone(timedelta(hours=3))
     current_time = datetime.now(eth_tz)
 
-    seller_info = get_seller_information()
-    base_url = seller_info.get("mor_base_url", "").rstrip("/")
+    driver_details = get_driver_details()
+    base_url = driver_details.get("mor_base_url", "").rstrip("/")
 
     access_token, refresh_token, expires_in = get_token_from_redis()
 
@@ -131,28 +131,16 @@ def get_eims_access_token():
             return token
 
     # Otherwise login
-    return login_eims(base_url, seller_info)
-
-
-
-
-
-
-
-
-################
-def get_seller_information():
-    """Get seller information from EIMS Settings"""
-    return get_driver_details()
+    return login_eims(base_url, driver_details)
 
 def get_eims_headers_and_url():
-    seller_info = get_driver_details()
+    driver_details = get_driver_details()
     token = get_eims_access_token()
 
     return {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json",
-    }, f"{seller_info['mor_base_url']}/v1"
+    }, f"{driver_details['mor_base_url']}/v1"
 
 
 def extract_406_data(data):
@@ -179,8 +167,8 @@ def extract_406_data(data):
 
     return latest_document_number, invoice_counter
 
-    #
-    def parse_ack_date(ack_date_iso):
+
+def parse_ack_date(ack_date_iso):
     if not ack_date_iso:
         return None
     # Remove anything after Z or + (timezone info)
@@ -190,27 +178,6 @@ def extract_406_data(data):
     # Convert to datetime object
     dt = datetime.fromisoformat(clean_str)
     return dt.strftime("%Y-%m-%d %H:%M:%S")
-###
-def safe_format_posting_date(posting_date, fmt="dd-mm-yyyy"):
-    """
-    Format posting_date with these rules using Ethiopian time (UTC+3):
-    """
-    try:
-        if not posting_date:
-            raise ValueError("posting_date is empty or None")
-
-        # Convert posting_date to date object
-        if isinstance(posting_date, str):
-            posting_date = datetime.strptime(posting_date, "%Y-%m-%d").date()
-        elif isinstance(posting_date, datetime):
-            posting_date = posting_date.date()
-
-
-        posting_date = posting_date - timedelta(days=1)
-        return formatdate(posting_date, fmt)
-
-
-
 
 
 
@@ -363,6 +330,3 @@ def safe_format_posting_date(posting_date, fmt="dd-mm-yyyy"):
 
 #     # fallback to login
 #     return login_eims(base_url)
-
-
-#endpoint and headers

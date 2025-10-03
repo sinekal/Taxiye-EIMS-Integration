@@ -104,8 +104,14 @@ def get_tax_provider_details(payload):
 
 #get driver information
 def get_driver_details():
-    settings = frappe.get_single("EIMS Settings")
     """Extract driver details"""
+    try:
+        settings = frappe.get_single("EIMS Settings")
+    except frappe.DoesNotExistError:
+        frappe.throw(
+            _("EIMS Settings are not configured. Please go to 'EIMS Settings' and save your credentials before submitting an invoice."),
+            title="Configuration Missing"
+        )
     driver_details = {
         "city": settings.city,  
         "email": settings.email,  

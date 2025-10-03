@@ -19,8 +19,8 @@ def save_eims_receipt(
     receipt_doc = frappe.new_doc("Trip Receipt")  # type: ignore
 
     # Map fields from parameters to doctype
-    receipt_doc.invoice_id = invoice_id                           # Invoice ID (Link to USP Invoice)
-    receipt_doc.irn = irn                                         # ERCA Invoice Reference Number
+    receipt_doc.invoice_id = invoice_id                           # Invoice ID (Link to trip Invoice)
+    receipt_doc.irn = irn                                         #  Invoice Reference Number
     receipt_doc.rrn = rrn                                         # Receipt Reference Number
     receipt_doc.payment_method = payment_method                   # Payment Method
     receipt_doc.payment_date = payment_date 

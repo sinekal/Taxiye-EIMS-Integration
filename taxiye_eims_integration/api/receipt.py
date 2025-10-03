@@ -15,8 +15,10 @@ from typing import Optional
 
 
 class PaymentModel(BaseModel):
-    total_amount: float = Field(..., description="total passenger Payment amount")
-    vat_amount: float = Field(..., description="VAT amount")
+    total_payment: float = Field(..., description="total passenger Payment amount")
+    amount: float = Field(..., description=" amount before tax")
+    tax: float = Field(..., description="Tax amount")
+    base_fare: float = Field(..., description="Base fare amount")
     commission_amount: float = Field(..., description="Commission amount")
     date: datetime.date = Field(..., description="Payment date in YYYY-MM-DD format")
     method: str = Field(..., description="Payment method")
@@ -26,6 +28,7 @@ class PaymentModel(BaseModel):
 class ReceiptModel(BaseModel):
     invoice_id: str = Field(..., description="Unique invoice ID")
     irn: str = Field(..., description="Invoice Reference Number")
+    CollectorName: Optional[str] = Field(None, description="Collector Name")
     status: str 
     signer_qr: Optional[str] = Field(None, description="Signer QR code")
     payment: PaymentModel
@@ -99,7 +102,7 @@ def create_receipt():
             {
                 "InvoiceIRN": irn,
                 "PaymentCoverage": "FULL",
-                "InvoicePaidAmount": total_amount,
+                "InvoicePaidAmount": collected_amount,
                 "DiscountAmount": discount_amount,
                 "RemainingAmount": None,
                 "TotalAmount": total_amount,
@@ -110,6 +113,7 @@ def create_receipt():
             "ChequeNumber": None,
             "CPONumber": None,
             "DocumentNumber": document_number,
+            "CollectorName": payload.CollectorName or None,
             "PaymentServiceProvider": payload.payment.method or "Bank",
             "AccountNumber": payload.payment.accountNumber or None,
             "TransactionNumber": payload.payment.transactionNumber or None,
@@ -179,22 +183,3 @@ def create_receipt():
     }
 
     return result
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -38,7 +38,7 @@ def save_eims_invoice(
     rider_name: str | None = None,
     rider_phone: str | None = None,
 ):
-    """Save a Trip Invoice with extended rider and plate information"""
+    """Save a Trip Invoice"""
 
     transaction_doc = frappe.new_doc("Trip Invoice")  # type: ignore
 
@@ -49,15 +49,8 @@ def save_eims_invoice(
     transaction_doc.date = date
     transaction_doc.time = time
     transaction_doc.reference = reference
-    
-
-    # Optional rider information
     transaction_doc.rider_name = rider_name
     transaction_doc.rider_phone = rider_phone
-    # Note: rider_tin and rider_email are not provided in function parameters
-    # These fields are optional and will be None if not provided
-
-    # Other fields
     transaction_doc.document_number = document_number
     transaction_doc.invoice_counter = invoice_counter
     transaction_doc.irn = irn
@@ -80,7 +73,7 @@ def save_eims_invoice(
 
 #create temporary invoice 
 def temporary_eims_invoice(document_number, invoice_counter):
-    # Create a new Document instance of doctype 'USP Invoice'
+    # Create a new Document instance of doctype 'Trip Invoice'
     transaction_doc = frappe.new_doc("Trip Invoice")  # type: ignore
 
     # --- Required fields from schema ---
@@ -91,9 +84,7 @@ def temporary_eims_invoice(document_number, invoice_counter):
     transaction_doc.reference = f"REF-{invoice_counter}"
     transaction_doc.amount = 0
     transaction_doc.total_payment = 0
-    transaction_doc.status = "Pending"  # must be one of: pending, sent to EIMS, acknowledged, completed, failed
-
-    # --- Optional / placeholder fields ---
+    transaction_doc.status = "Pending"  
     transaction_doc.tax = 0
     transaction_doc.previous_irn = ""
     transaction_doc.irn = ""
@@ -103,8 +94,6 @@ def temporary_eims_invoice(document_number, invoice_counter):
     transaction_doc.document_number = document_number
     transaction_doc.invoice_counter = invoice_counter
     transaction_doc.description = "Temporary invoice created for synchronization."
-
-    # Save
     transaction_doc.insert(ignore_permissions=True)
     frappe.db.commit()  # type: ignore
 

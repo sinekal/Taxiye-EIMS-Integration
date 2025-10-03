@@ -163,8 +163,6 @@ def save_invoice_for_internal_reference(last_doc, data, payload):
         invoice_number=payload.invoice_number,
         rider_name=payload.rider_name,
         rider_phone=payload.rider_phone,
-        rider_tin=payload.rider_tin,
-        trip_id = payload.trip_id,
     )
 
     return {
@@ -178,7 +176,6 @@ def save_invoice_for_internal_reference(last_doc, data, payload):
             "taxi_provider_phone": payload.taxi_provider_phone,
             "rider_name": payload.rider_name,
             "rider_phone": payload.rider_phone,
-            "rider_tin": payload.rider_tin,
             "date": payload.date,
             "time": payload.time,
             "reference": payload.reference,
@@ -242,11 +239,9 @@ def create_invoice(max_retries=5):
             time.sleep(delay)
             continue
 
-        else:
+        elif response.status_code == 200 and data.get("statusCode") == 200:
             # Success
-            last_doc = get_last_eims_invoice()
             result = save_invoice_for_internal_reference(last_doc, data, validated_data)
             return result
-            # break
     else:
         raise Exception("Failed to submit invoice: Too many requests repeatedly.")
